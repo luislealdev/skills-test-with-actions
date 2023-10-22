@@ -30,7 +30,22 @@ jobs:
           echo "current_step=$(cat ./.github/steps/-step.txt)" >> $GITHUB_OUTPUT
     outputs:
       current_step: ${{ steps.get_step.outputs.current_step }}
+      
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
 
+      - name: Run markdown lint
+        run: |
+          npm install remark-cli remark-preset-lint-consistent
+          npx remark . --use remark-preset-lint-consistent --frail
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: remark-lint-report
+          path: public/
+        
   on_start:
     name: On start
     needs: get_current_step
@@ -48,8 +63,19 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - uses: actions/checkout@v3
+
+    - name: Run markdown lint
+      run: |
+        npm install remark-cli remark-preset-lint-consistent
+        npx remark . --use remark-preset-lint-consistent --frail
+
+    - uses: actions/upload-artifact@v3
+      with:
+        name: remark-lint-report
+        path: public/
       # We'll need to check out the repository so that we can edit the README.
-      - name: Checkout
+    - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0 # Let's get all the branches.
